@@ -87,3 +87,14 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+*.pyc
+*.swp
+.cache
+env/
+.DS_Store
+.env
+apps/public_root
+celerybeat-schedule
+celerybeat-schedule.db
+apps/db.sqlite3
