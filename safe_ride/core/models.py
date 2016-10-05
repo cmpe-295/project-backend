@@ -18,6 +18,8 @@ class SiteUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    first_name = models.TextField(null=True, blank=True)
+    last_name = models.TextField(null=True, blank=True)
 
     USERNAME_FIELD = 'email'
 
@@ -44,3 +46,4 @@ class Client(models.Model):
     user = models.OneToOneField(SiteUser, related_name='client')
     sjsu_id = models.CharField(max_length=15)
     email_verified = models.BooleanField(default=False)
+    activation_link_offset = models.TextField(null=True, blank=True)

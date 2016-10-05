@@ -1,6 +1,9 @@
 # Create your views here.
 import json
+import uuid
 
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseNotAllowed
@@ -9,6 +12,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from .helpers import send_activation_email
 from .api import DriverSerializer
 from .models import Driver, SiteUser, Client
 
@@ -40,9 +44,31 @@ def client_sign_up(request):
             existing_user_sjsu_id = Client.objects.filter(sjsu_id=sjsu_id)
             if len(existing_user_email) > 0 or len(existing_user_sjsu_id) > 0:
                 return HttpResponseBadRequest("User with similar email or SJSU ID exists")
-            # send email
+            link = str(uuid.uuid4())
+            user = SiteUser(email=email, is_active=False, first_name=first_name, last_name=last_name)
+            user.set_password(password)
+            user.save()
+            client = Client(user=user, sjsu_id=sjsu_id, activation_link_offset=link)
+            client.save()
+            link = "%sactivate_app/%s/" % (settings.API_URL, link)
+            send_activation_email(user.email, link)
             return HttpResponse("Email has been sent. Please click on the link to activate your account")
         else:
             return HttpResponseBadRequest("One or more field(s) are empty.")
     else:
         return HttpResponseNotAllowed(['POST'])
+
+
+def activate_app(request, activation_string):
+    try:
+        client = Client.objects.get(activation_link_offset=activation_string)
+        client.email_verified = True
+        client.activation_link_offset = ""
+        client.save()
+        client.user.is_active = True
+        client.user.save()
+        return HttpResponse("Your account is now active!")
+    except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
+        return HttpResponseBadRequest("Invalid Activation URL")
+
+
