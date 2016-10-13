@@ -12,6 +12,7 @@ class AssignmentSubmission(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     total_points = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return self.student_id
