@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'core',
     'rest_framework',
     'rest_framework.authtoken',
+    'assignment_submission',
 ]
 
 MIDDLEWARE_CLASSES = (

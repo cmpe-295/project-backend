@@ -72,3 +72,7 @@ def activate_app(request, activation_string):
         return HttpResponseBadRequest("Invalid Activation URL")
 
 
+def home(request):
+    return HttpResponse("Spartan safe ride project site")
+
+

@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^login/', rest_framework_authtoken_views.obtain_auth_token),
     url(r'^', include('core.urls')),
+    url(r'^assignment_submission/', include('assignment_submission.urls'))
 ]
