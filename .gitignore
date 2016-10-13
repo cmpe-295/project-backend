@@ -98,3 +98,4 @@ apps/public_root
 celerybeat-schedule
 celerybeat-schedule.db
 apps/db.sqlite3
+safe_ride/safe_ride/settings.py
