@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseNotAllowed
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view
@@ -52,9 +53,10 @@ def client_sign_up(request):
             client.save()
             link = "%sactivate_app/%s/" % (settings.API_URL, link)
             send_activation_email(user.email, link)
-            return HttpResponse("Email has been sent. Please click on the link to activate your account")
+            return JsonResponse(
+                {"success": True, "message": "Email has been sent. Please click on the link to activate your account"})
         else:
-            return HttpResponseBadRequest("One or more field(s) are empty.")
+            return JsonResponse({"error": True, "message":"One or more field(s) are empty."})
     else:
         return HttpResponseNotAllowed(['POST'])
 
@@ -74,5 +76,3 @@ def activate_app(request, activation_string):
 
 def home(request):
     return HttpResponse("Spartan safe ride project site")
-
-
