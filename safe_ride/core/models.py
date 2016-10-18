@@ -41,9 +41,15 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class Driver(models.Model):
     user = models.OneToOneField(SiteUser, related_name='driver')
 
+    def __unicode__(self):
+        return "%s %s" % (self.user.first_name, self.user.last_name)
+
 
 class Client(models.Model):
     user = models.OneToOneField(SiteUser, related_name='client')
     sjsu_id = models.CharField(max_length=15)
     email_verified = models.BooleanField(default=False)
     activation_link_offset = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s %s" % (self.user.first_name, self.user.last_name)
