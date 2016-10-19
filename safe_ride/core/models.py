@@ -50,6 +50,8 @@ class Client(models.Model):
     sjsu_id = models.CharField(max_length=15)
     email_verified = models.BooleanField(default=False)
     activation_link_offset = models.TextField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __unicode__(self):
         return "%s %s" % (self.user.first_name, self.user.last_name)

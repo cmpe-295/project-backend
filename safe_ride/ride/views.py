@@ -84,3 +84,18 @@ def update_driver_location(request):
     return Response({
         "success": True
     }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def update_client_location(request):
+    client = request.user.client
+    latest_location = DriverLocation.objects.filter(latest=True)[:1]
+    client.latitude = request.data.get("latitude")
+    client.longitude = request.data.get("longitude")
+    client.save()
+    return Response({
+        "success": True,
+        "driver_latitude": latest_location.latitude,
+        "driver_longitude": latest_location.longitude
+    }, status=status.HTTP_201_CREATED)

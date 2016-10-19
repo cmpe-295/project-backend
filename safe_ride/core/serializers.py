@@ -9,7 +9,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ("first_name", "last_name", "id", "sjsu_id")
+        fields = ("first_name", "last_name", "id", "sjsu_id", "latitude", "longitude")
 
     def get_first_name(self, obj):
         return obj.user.first_name
