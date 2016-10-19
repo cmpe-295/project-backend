@@ -8,7 +8,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
-from .models import Ride, DriverLocation
+from .models import Ride, DriverLocation, calculate_route
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -31,11 +31,10 @@ def request_ride(request):
         request_received_at=timezone.now(),
     )
     ride.save()
-    # calculate the route/eta
-    eta = 1
+    route = calculate_route()
     return Response({
         "success": True,
-        "eta": eta
+        "route": route
     }, status=status.HTTP_201_CREATED)
 
 

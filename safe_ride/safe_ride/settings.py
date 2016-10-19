@@ -138,3 +138,4 @@ REST_FRAMEWORK = {
 API_URL = os.environ.get('API_URL', "http://saferide.nagkumar.com/")
 MAILGUN_API_DOMAIN = "https://api.mailgun.net/v3/mailgun.nagkumar.com/messages"
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", None)
+MAPQUEST_KEY = "aWZv3JyXYhcB520GqkBGGRmNsnJPRwJe"

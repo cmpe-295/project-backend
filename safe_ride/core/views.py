@@ -9,10 +9,12 @@ from django.http import HttpResponseBadRequest
 from django.http import HttpResponseNotAllowed
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import api_view
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
+from .serializers import ClientSerializer
 from .helpers import send_activation_email
 from .api import DriverSerializer
 from .models import Driver, SiteUser, Client
@@ -56,7 +58,7 @@ def client_sign_up(request):
             return JsonResponse(
                 {"success": True, "message": "Email has been sent. Please click on the link to activate your account"})
         else:
-            return JsonResponse({"error": True, "message":"One or more field(s) are empty."})
+            return JsonResponse({"error": True, "message": "One or more field(s) are empty."})
     else:
         return HttpResponseNotAllowed(['POST'])
 
@@ -76,3 +78,16 @@ def activate_app(request, activation_string):
 
 def home(request):
     return HttpResponse("Spartan safe ride project site")
+
+
+@api_view(['GET'])
+@authentication_classes((CsrfExemptSessionAuthentication, BasicAuthentication, TokenAuthentication))
+def get_info(request):
+    if hasattr(request.user, "client"):
+        serialized = ClientSerializer(request.user.client)
+        return Response(serialized.data, status=status.HTTP_200_OK)
+    else:
+        return Response({
+            "error": True,
+            "message": "Client not found or wrong auth token"
+        }, status=status.HTTP_404_NOT_FOUND)

@@ -99,3 +99,4 @@ celerybeat-schedule
 celerybeat-schedule.db
 apps/db.sqlite3
 safe_ride/safe_ride/settings.py
+safe_ride/fabfile.py

@@ -1,7 +1,15 @@
+import json
+import sys
+
+import numpy as np
+import requests
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
 from core.models import Client, Driver
+
+from core.serializers import ClientSerializer
 
 
 class Ride(models.Model):
@@ -33,3 +41,90 @@ class DriverLocation(models.Model):
 
     def __unicode__(self):
         return "%s %s" % (self.driver, self.timestamp.strftime("%H:%M:%S"))
+
+
+def dijkstra(matrix, m=None, n=None):
+    m = n = len(matrix)
+    k = 0
+    cost = [[0 for x in range(m)] for x in range(1)]
+    offsets = [k]
+    elepos = 0
+    for j in range(m):
+        cost[0][j] = matrix[k][j]
+    mini = 999
+    for x in range(m - 1):
+        mini = 999
+        for j in range(m):
+            if cost[0][j] <= mini and j not in offsets:
+                mini = cost[0][j]
+                elepos = j
+        offsets.append(elepos)
+        for j in range(m):
+            if cost[0][j] > cost[0][elepos] + matrix[elepos][j]:
+                cost[0][j] = cost[0][elepos] + matrix[elepos][j]
+    return offsets, cost[0]
+
+
+def calculate_route():
+    mapquest_url = "http://www.mapquestapi.com/directions/v2/routematrix?key=%s" % settings.MAPQUEST_KEY
+    request_body = {
+        "options": {
+            "allToAll": True
+        }
+    }
+    locations = []
+    current_driver_location = DriverLocation.objects.filter(latest=True).order_by("-timestamp")
+    current_driver_location = current_driver_location[0]
+    locations.append({
+        "latLng": {
+            "lat": current_driver_location.latitude,
+            "lng": current_driver_location.longitude,
+
+        },
+        "user": "Driver",
+        "custom_type": "start"
+    })
+    for location in Ride.objects.filter(active=True, deleted=False).order_by("request_received_at")[:8]:
+        if location.serviced_by:
+            locations.append({
+                "latLng": {
+                    "lat": location.drop_latitude,
+                    "lng": location.drop_longitude
+                },
+                "user": ClientSerializer(location.client).data,
+                "custom_type": "drop",
+                "ride_id": location.pk
+            })
+        else:
+            locations.append({
+                "latLng": {
+                    "lat": location.pickup_latitude,
+                    "lng": location.pickup_longitude
+                },
+                "user": ClientSerializer(location.client).data,
+                "custom_type": "pick",
+                "ride_id": location.pk
+            })
+    request_body['locations'] = locations
+    response = requests.post(mapquest_url, data=json.dumps(request_body))
+    if response.status_code == 200:
+        time_matrix = json.loads(response.content)['time']
+        path, cost_matrix = dijkstra(time_matrix)
+        eta = 0
+        path_in_co_ordinates = [{
+            "latLng": locations[0]['latLng'],
+            "user": "driver",
+            "eta": eta
+        }]
+        for index in range(1, len(path)):
+            eta += cost_matrix[index]
+            path_in_co_ordinates.append({
+                "latLng": locations[path[index]]['latLng'],
+                "user": locations[path[index]]['user'],
+                "type": locations[path[index]]['custom_type'],
+                "eta": eta,
+                "ride_id": locations[path[index]]['ride_id']
+            })
+        return path_in_co_ordinates
+    else:
+        print "error"
