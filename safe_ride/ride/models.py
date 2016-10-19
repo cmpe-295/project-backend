@@ -10,6 +10,7 @@ from django.db import models
 from core.models import Client, Driver
 
 from core.serializers import ClientSerializer
+from django.utils import timezone
 
 
 class Ride(models.Model):
@@ -105,6 +106,7 @@ def calculate_route(client_id=None):
                 "custom_type": "pick",
                 "ride_id": location.pk
             })
+        location.request_processed_at = timezone.now()
     request_body['locations'] = locations
     response = requests.post(mapquest_url, data=json.dumps(request_body))
     if response.status_code == 200:
