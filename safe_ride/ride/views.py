@@ -8,6 +8,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
+from core.models import Client
 from .serializers import RideSerializer
 from .models import Ride, DriverLocation, calculate_route
 
@@ -60,6 +61,10 @@ def cancel_ride(request):
         ride.deleted = True
         ride.active = False
         ride.save()
+        route = calculate_route()
+        '''
+            TO DO: Send Push notifications to clients with new route
+        '''
         return Response({
             "success": True,
             "message": "Ride request cancelled"
@@ -111,3 +116,41 @@ def update_client_location(request):
         "driver_latitude": latest_location.latitude,
         "driver_longitude": latest_location.longitude
     }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PUT'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def pickup_client(request):
+    sjsu_id = request.data.get("sjsu_id", None)
+    try:
+        if sjsu_id:
+            client = Client.objects.get(sjsu_id=sjsu_id)
+            ride = client.rides.filter(active=True, deleted=False, serviced_by=None)
+            if len(ride) > 0:
+                ride = ride[0]
+                ride.serviced_by = request.user.driver
+                ride.save()
+                route = calculate_route()
+                return Response({
+                    "route": route,
+                    "success": True,
+                    "message": "Pickup Successful. Route updated."
+                })
+                '''
+                    TO DO: Send Push notifications to clients with new route
+                '''
+            else:
+                return Response({
+                    "error": True,
+                    "message": "Client does not have a ride scheduled"
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({
+                "error": True,
+                "message": "Invalid id"
+            }, status=status.HTTP_404_NOT_FOUND)
+    except ObjectDoesNotExist:
+        return Response({
+            "error": True,
+            "message": "Invalid id"
+        }, status=status.HTTP_404_NOT_FOUND)
