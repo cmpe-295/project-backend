@@ -39,10 +39,14 @@ def request_ride(request):
         request_received_at=timezone.now(),
     )
     ride.save()
-    route = calculate_route()
+    route, eta_for_client = calculate_route(client.id)
+    ride.initial_eta = eta_for_client
+    ride.save()
+    ride_serialized = RideSerializer(ride)
     return Response({
         "success": True,
-        "route": route
+        "route": route,
+        "ride": ride_serialized.data,
     }, status=status.HTTP_201_CREATED)
 
 

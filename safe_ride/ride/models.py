@@ -65,7 +65,7 @@ def dijkstra(matrix, m=None, n=None):
     return offsets, cost[0]
 
 
-def calculate_route():
+def calculate_route(client_id=None):
     mapquest_url = "http://www.mapquestapi.com/directions/v2/routematrix?key=%s" % settings.MAPQUEST_KEY
     request_body = {
         "options": {
@@ -125,6 +125,12 @@ def calculate_route():
                 "eta": eta,
                 "ride_id": locations[path[index]]['ride_id']
             })
+        if client_id:
+            eta_for_client = 0
+            for i in range(1, len(path_in_co_ordinates)):
+                if path_in_co_ordinates[i]["user"]["id"] == client_id:
+                    eta_for_client = path_in_co_ordinates[i]["eta"]
+            return path_in_co_ordinates, eta_for_client
         return path_in_co_ordinates
     else:
         print "error"
