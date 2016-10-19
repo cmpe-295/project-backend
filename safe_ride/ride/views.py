@@ -8,6 +8,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
+from .serializers import RideSerializer
 from .models import Ride, DriverLocation, calculate_route
 
 
@@ -20,6 +21,13 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 @authentication_classes((CsrfExemptSessionAuthentication, BasicAuthentication, TokenAuthentication))
 def request_ride(request):
     client = request.user.client
+    if len(client.rides.filter(active=True, deleted=False)) > 0:
+        ride_serialized = RideSerializer(client.rides.filter(active=True, deleted=False)[0])
+        return Response({
+            "error": True,
+            "message": "You have an active ride!",
+            "ride": ride_serialized.data
+        })
     ride = Ride(
         client=client,
         active=True,
