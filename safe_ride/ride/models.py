@@ -108,31 +108,34 @@ def calculate_route(client_id=None):
             })
         location.request_processed_at = timezone.now()
     request_body['locations'] = locations
-    response = requests.post(mapquest_url, data=json.dumps(request_body))
-    if response.status_code == 200:
-        time_matrix = json.loads(response.content)['time']
-        path, cost_matrix = dijkstra(time_matrix)
-        eta = 0
-        path_in_co_ordinates = [{
-            "latLng": locations[0]['latLng'],
-            "user": "driver",
-            "eta": eta
-        }]
-        for index in range(1, len(path)):
-            eta += cost_matrix[index]
-            path_in_co_ordinates.append({
-                "latLng": locations[path[index]]['latLng'],
-                "user": locations[path[index]]['user'],
-                "type": locations[path[index]]['custom_type'],
-                "eta": eta,
-                "ride_id": locations[path[index]]['ride_id']
-            })
-        if client_id:
-            eta_for_client = 0
-            for i in range(1, len(path_in_co_ordinates)):
-                if path_in_co_ordinates[i]["user"]["id"] == client_id:
-                    eta_for_client = path_in_co_ordinates[i]["eta"]
-            return path_in_co_ordinates, eta_for_client
-        return path_in_co_ordinates
+    if len(locations) > 0:
+        response = requests.post(mapquest_url, data=json.dumps(request_body))
+        if response.status_code == 200:
+            time_matrix = json.loads(response.content)['time']
+            path, cost_matrix = dijkstra(time_matrix)
+            eta = 0
+            path_in_co_ordinates = [{
+                "latLng": locations[0]['latLng'],
+                "user": "driver",
+                "eta": eta
+            }]
+            for index in range(1, len(path)):
+                eta += cost_matrix[index]
+                path_in_co_ordinates.append({
+                    "latLng": locations[path[index]]['latLng'],
+                    "user": locations[path[index]]['user'],
+                    "type": locations[path[index]]['custom_type'],
+                    "eta": eta,
+                    "ride_id": locations[path[index]]['ride_id']
+                })
+            if client_id:
+                eta_for_client = 0
+                for i in range(1, len(path_in_co_ordinates)):
+                    if path_in_co_ordinates[i]["user"]["id"] == client_id:
+                        eta_for_client = path_in_co_ordinates[i]["eta"]
+                return path_in_co_ordinates, eta_for_client
+            return path_in_co_ordinates
+        else:
+            print "error"
     else:
-        print "error"
+        return None
