@@ -139,3 +139,4 @@ API_URL = os.environ.get('API_URL', "http://saferide.nagkumar.com/")
 MAILGUN_API_DOMAIN = "https://api.mailgun.net/v3/mailgun.nagkumar.com/messages"
 MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY", None)
 MAPQUEST_KEY = "aWZv3JyXYhcB520GqkBGGRmNsnJPRwJe"
+FIREBASE_DRIVER_KEY = 'AAAAueWfBbo:APA91bEsQZvpKOMJPm8mTqfz9gMM2Ar4Z4Y1yusfOf8_GpN3Fwrbh2v8okOTYo62pb-Mz066KzH5y1R2k0YWGLDDlGUortgybmMk4yNcpHcsJaRrZRbcaLTECa14-kV2RGHZBnDCR4nRe9SFzsViqH3rGppiH5gmRA'

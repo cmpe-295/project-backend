@@ -2,3 +2,4 @@ django==1.8
 djangorestframework
 requests
 numpy
+pyfcm
