@@ -11,6 +11,10 @@ from core.models import Client, Driver
 
 from core.serializers import ClientSerializer
 from django.utils import timezone
+from pyfcm import FCMNotification
+from django.conf import settings
+
+PUSH_SERVICE = FCMNotification(api_key=settings.FIREBASE_DRIVER_KEY)
 
 
 class Ride(models.Model):
@@ -133,7 +137,11 @@ def calculate_route(client_id=None):
                 for i in range(1, len(path_in_co_ordinates)):
                     if path_in_co_ordinates[i]["user"]["id"] == client_id:
                         eta_for_client = path_in_co_ordinates[i]["eta"]
+                result = PUSH_SERVICE.notify_single_device(
+                    registration_id=current_driver_location.driver.push_notification_token,
+                    data_message={"path": path_in_co_ordinates}, message_body={"path": path_in_co_ordinates})
                 return path_in_co_ordinates, eta_for_client
+
             return path_in_co_ordinates
         else:
             print "error"

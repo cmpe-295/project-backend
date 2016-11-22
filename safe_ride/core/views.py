@@ -91,3 +91,18 @@ def get_info(request):
             "error": True,
             "message": "Client not found or wrong auth token"
         }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@authentication_classes((CsrfExemptSessionAuthentication, BasicAuthentication, TokenAuthentication))
+def update_device_token(request):
+    if hasattr(request.user, "driver"):
+        token = request.POST.get("token")
+        request.user.driver.push_notification_token = token
+        request.user.driver.save()
+        return Response({}, status=status.HTTP_201_CREATED)
+    else:
+        return Response({
+            "error": True,
+            "message": "Driver not found."
+        }, status=status.HTTP_400_BAD_REQUEST)

@@ -40,6 +40,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 class Driver(models.Model):
     user = models.OneToOneField(SiteUser, related_name='driver')
+    push_notification_token = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return "%s %s" % (self.user.first_name, self.user.last_name)

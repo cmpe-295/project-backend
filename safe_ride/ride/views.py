@@ -13,6 +13,7 @@ from .serializers import RideSerializer
 from .models import Ride, DriverLocation, calculate_route
 
 
+
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
