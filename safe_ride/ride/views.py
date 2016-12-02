@@ -166,7 +166,7 @@ def drop_client(request):
     try:
         if sjsu_id:
             client = Client.objects.get(sjsu_id=sjsu_id)
-            ride = client.rides.filter(active=True, deleted=False, serviced_by=None)
+            ride = client.rides.filter(active=True, deleted=False)
             if len(ride) > 0:
                 ride = ride[0]
                 ride.active = False
