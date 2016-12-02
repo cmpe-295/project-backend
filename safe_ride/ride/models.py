@@ -71,7 +71,7 @@ def dijkstra(matrix, m=None, n=None):
 
 
 def calculate_route(client_id=None):
-    mapquest_url = "http://www.mapquestapi.com/directions/v2/routematrix?key=%s" % settings.MAPQUEST_KEY
+    mapquest_url = "https://www.mapquestapi.com/directions/v2/routematrix?key=%s" % settings.MAPQUEST_KEY
     request_body = {
         "options": {
             "allToAll": True
@@ -124,6 +124,7 @@ def calculate_route(client_id=None):
                 "eta": eta
             }]
             for index in range(1, len(path)):
+		print path[index]
                 eta += cost_matrix[index]
                 path_in_co_ordinates.append({
                     "latLng": locations[path[index]]['latLng'],

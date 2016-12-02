@@ -94,10 +94,11 @@ def get_info(request):
 
 
 @api_view(['POST'])
-@authentication_classes((CsrfExemptSessionAuthentication, BasicAuthentication, TokenAuthentication))
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
 def update_device_token(request):
     if hasattr(request.user, "driver"):
-        token = request.POST.get("token")
+        token = request.data.get("token")
+	print token
         request.user.driver.push_notification_token = token
         request.user.driver.save()
         return Response({}, status=status.HTTP_201_CREATED)

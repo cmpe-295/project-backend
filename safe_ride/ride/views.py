@@ -42,6 +42,8 @@ def request_ride(request):
     )
     ride.save()
     route, eta_for_client = calculate_route(client.id)
+    print route
+    print eta_for_client
     ride.initial_eta = eta_for_client
     ride.save()
     ride_serialized = RideSerializer(ride)
@@ -83,14 +85,13 @@ def cancel_ride(request):
 
 
 @api_view(['POST'])
-@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+@authentication_classes((TokenAuthentication, CsrfExemptSessionAuthentication))
 def update_driver_location(request):
     driver = request.user.driver
     locations = driver.location.filter(latest=True)
     for old_location in locations:
         old_location.latest = False
         old_location.save()
-
     location = DriverLocation(
         driver=driver,
         latitude=request.data.get("latitude"),
