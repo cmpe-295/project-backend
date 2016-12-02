@@ -207,7 +207,7 @@ def get_driver_location(request):
             "latitude": driver_location.latitude,
             "longitude": driver_location.longitude,
             "last_updated": driver_location.timestamp,
-            "driver": driver_location.driver.user.get_full_name()
+            "driver": "%s %s" % (driver_location.driver.user.first_name, driver_location.driver.user.last_name)
         })
     except:
         return Response({"error": True, "message": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
