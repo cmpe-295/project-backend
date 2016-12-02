@@ -13,7 +13,6 @@ from .serializers import RideSerializer
 from .models import Ride, DriverLocation, calculate_route
 
 
-
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # To not perform the csrf check previously happening
@@ -196,3 +195,19 @@ def drop_client(request):
             "error": True,
             "message": "Invalid id"
         }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def get_driver_location(request):
+    driver_location = DriverLocation.objects.filter(latest=True)
+    try:
+        driver_location = driver_location[0]
+        return Response({
+            "latitude": driver_location.latitude,
+            "longitude": driver_location.longitude,
+            "last_updated": driver_location.timestamp,
+            "driver": driver_location.driver.user.get_full_name()
+        })
+    except:
+        return Response({"error": True, "message": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
