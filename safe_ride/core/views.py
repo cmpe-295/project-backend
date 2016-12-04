@@ -3,11 +3,13 @@ import json
 import uuid
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseNotAllowed
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
@@ -98,7 +100,7 @@ def get_info(request):
 def update_device_token(request):
     if hasattr(request.user, "driver"):
         token = request.data.get("token")
-	print token
+        print token
         request.user.driver.push_notification_token = token
         request.user.driver.save()
         return Response({}, status=status.HTTP_201_CREATED)
@@ -107,3 +109,8 @@ def update_device_token(request):
             "error": True,
             "message": "Driver not found."
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@login_required()
+def monitor(request):
+    return render(request, 'monitor.html', {"maps_key": "AIzaSyD_9ysjfo1wKN3jul2uF4rE00Yz_2_6ylo"})

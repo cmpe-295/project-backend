@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: 400px;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var map;
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 37.335792, lng: -121.885848},
+            zoom: 14
+        });
+        var busIcon = {
+            url: "http://maps.google.com/mapfiles/kml/shapes/bus.png", // url
+            scaledSize: new google.maps.Size(20, 20), // scaled size
+        };
+        var marker = new google.maps.Marker({
+            map: map,
+            position: new google.maps.LatLng(37.335792543, -121.885848543),
+            icon: busIcon,
+        });
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{maps_key}}&callback=initMap"
+        async defer></script>
+</body>
+</html>
