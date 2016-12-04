@@ -21,7 +21,10 @@
 </head>
 <body>
 <div id="map"></div>
+<div id="table" style="margin: 0 auto; width: 80%"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
 <script>
     var map;
     var busMarker;
@@ -35,6 +38,31 @@
         });
         updateDriverLocation();
         var displayRouteInterval = window.setInterval(displayRoute, 3000);
+    }
+    function updateTable(rows)  {
+        if(rows.length > 0) {
+            var table = '<table class="table table-hover table-condensed">' +
+                '<thead><tr><td>Name</td><td>Requested at</td><td>Picked up at</td></tr></tr></thead>' +
+                '<tbody>rows_placeholder</tbody>' +
+                '</table>';
+            var rows_string = "";
+            var t1, t2="";
+            for (var i = 0; i < rows.length; i++) {
+                t1 = new Date(0);
+                t1.setUTCSeconds(rows[i].request_time);
+                if(rows[i].pickup_at){
+                    t2 = new Date(0);
+                    t2.setUTCSeconds(rows[i].pickup_at);
+                }
+                rows_string += "<tr>" +
+                    "<td>"+rows[i]['user']['first_name']+' '+rows[i]['user']['last_name']+"</td>" +
+                    "<td>"+t1+"</td>" +
+                    "<td>"+t2+"</td>" +
+                    "</tr>";
+            }
+            return table.replace("rows_placeholder", rows_string);
+        }
+        return "";
     }
     function updateDriverLocation() {
         $.get(driverLocationURL, function (data) {
@@ -67,6 +95,10 @@
             url: "http://maps.google.com/mapfiles/kml/shapes/man.png",
             scaledSize: new google.maps.Size(15, 15)
         };
+        var dropoffIcon = {
+            url: "http://maps.google.com/mapfiles/kml/pal2/icon5.png",
+            scaledSize: new google.maps.Size(15, 15)
+        };
         $.get(routeURL, function (data) {
             if (data.length > 0) {
                 if (busMarker != undefined) {
@@ -80,20 +112,49 @@
                 for (var i = 0; i < clientMarkers.length; i++) {
                     clientMarkers[i].map = null;
                 }
-                var customMarker;
+                var customMarker, t1, t2;
                 var contentString = "";
                 var infowindow = new google.maps.InfoWindow({
                     content: ""
                 });
-                for (i = 1; i < data.length; i++) {
+                $("#table").html("");
+                var spliced = data.splice(1);
+                var table = updateTable(spliced);
+                if(table!= "")  {
+                    $("#table").html(table);
+                }
+                var data = spliced;
+                for (i = 0; i < data.length; i++) {
+                    console.log(data[i]);
                     customMarker = null;
-                    contentString = '<div class="header">Person: ' + data[i]['user']['first_name'] + ' ' + data[i]['user']['last_name'] + '</div>';
-                    customMarker = new google.maps.Marker({
-                        map: map,
-                        position: new google.maps.LatLng(data[i].latLng),
-                        icon: personIcon,
-                        html: contentString
-                    });
+                    t1 = new Date(0);
+                    t1.setUTCSeconds(data[i].request_time);
+                    t2 = null;
+                    if(data[i].pickup_at){
+                        t2 = new Date(0);
+                        t2.setUTCSeconds(data[i].pickup_at);
+                    }
+                    contentString = '<div class="header">Person: ' + data[i]['user']['first_name'] + ' ' + data[i]['user']['last_name'] + '</div>' +
+                        '<br />' +
+                        '<div>Requested at: '+t1+'</div>';
+
+                    if(t2){
+                        contentString += '<br />' + '<div>Picked up at: '+t1+'</div>';
+                        customMarker = new google.maps.Marker({
+                            map: map,
+                            position: new google.maps.LatLng(data[i].latLng),
+                            icon: dropoffIcon,
+                            html: contentString
+                        });
+                    }
+                    else{
+                        customMarker = new google.maps.Marker({
+                            map: map,
+                            position: new google.maps.LatLng(data[i].latLng),
+                            icon: personIcon,
+                            html: contentString
+                        });
+                    }
                     google.maps.event.addListener(customMarker, 'click', function () {
                         infowindow.setContent(this.html);
                         infowindow.open(map, this);

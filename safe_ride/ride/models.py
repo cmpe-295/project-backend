@@ -1,18 +1,12 @@
 import json
-import sys
 
-import numpy as np
 import requests
+from core.models import Client, Driver
+from core.serializers import ClientSerializer
 from django.conf import settings
 from django.db import models
-
-# Create your models here.
-from core.models import Client, Driver
-
-from core.serializers import ClientSerializer
 from django.utils import timezone
 from pyfcm import FCMNotification
-from django.conf import settings
 
 PUSH_SERVICE = FCMNotification(api_key=settings.FIREBASE_DRIVER_KEY)
 
@@ -67,8 +61,6 @@ def dijkstra(matrix, m=None, n=None):
         for j in range(m):
             if cost[0][j] > cost[0][elepos] + matrix[elepos][j]:
                 cost[0][j] = cost[0][elepos] + matrix[elepos][j]
-    print cost
-    print offsets
     return offsets, cost[0]
 
 
@@ -92,7 +84,6 @@ def calculate_route(client_id=None):
         "custom_type": "start"
     })
     for location in Ride.objects.filter(active=True, deleted=False).order_by("request_received_at")[:8]:
-        print location
         if location.serviced_by:
             locations.append({
                 "latLng": {
@@ -101,7 +92,9 @@ def calculate_route(client_id=None):
                 },
                 "user": ClientSerializer(location.client).data,
                 "custom_type": "drop",
-                "ride_id": location.pk
+                "ride_id": location.pk,
+                "request_time": location.request_received_at.strftime("%s"),
+                "pickup_at": location.pickup_at.strftime("%s")
             })
         else:
             locations.append({
@@ -111,7 +104,9 @@ def calculate_route(client_id=None):
                 },
                 "user": ClientSerializer(location.client).data,
                 "custom_type": "pick",
-                "ride_id": location.pk
+                "ride_id": location.pk,
+                "request_time": location.request_received_at.strftime("%s"),
+                "pickup_at": None
             })
         location.request_processed_at = timezone.now()
     request_body['locations'] = locations
@@ -138,7 +133,9 @@ def calculate_route(client_id=None):
                     "user": locations[path[index]]['user'],
                     "type": locations[path[index]]['custom_type'],
                     "eta": eta,
-                    "ride_id": locations[path[index]]['ride_id']
+                    "ride_id": locations[path[index]]['ride_id'],
+                    "request_time": locations[path[index]]['request_time'],
+                    "pickup_at": locations[path[index]]['pickup_at']
                 })
             if client_id:
                 eta_for_client = 0
