@@ -21,23 +21,42 @@
 </head>
 <body>
 <div id="map"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script>
     var map;
+    var busMarker;
+    var driverLocationURL = "{% url 'get_driver_location' %}";
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.335792, lng: -121.885848},
             zoom: 14
         });
-        var busIcon = {
-            url: "http://maps.google.com/mapfiles/kml/shapes/bus.png", // url
-            scaledSize: new google.maps.Size(20, 20), // scaled size
-        };
-        var marker = new google.maps.Marker({
-            map: map,
-            position: new google.maps.LatLng(37.335792543, -121.885848543),
-            icon: busIcon,
+        var updateDriverLocationInterval = window.setInterval(updateDriverLocation, 3000);
+    }
+    function updateDriverLocation() {
+        $.get(driverLocationURL, function(data){
+            var driverLocation = {
+                lat: data['latitude'],
+                lng: data['longitude']
+            };
+            if (busMarker != undefined){
+                busMarker.setMap(null);
+            }
+
+            var busIcon = {
+                url: "http://maps.google.com/mapfiles/kml/shapes/bus.png",
+                scaledSize: new google.maps.Size(20, 20)
+            };
+            busMarker = new google.maps.Marker({
+                map: map,
+                position: new google.maps.LatLng(driverLocation.lat, driverLocation.lng),
+                icon: busIcon
+            });
+
         });
     }
+
+
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key={{maps_key}}&callback=initMap"
         async defer></script>
