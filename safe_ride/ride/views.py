@@ -211,3 +211,10 @@ def get_driver_location(request):
         })
     except:
         return Response({"error": True, "message": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def get_current_route(request):
+    route = calculate_route()
+    return Response(route)

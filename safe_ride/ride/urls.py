@@ -7,5 +7,6 @@ urlpatterns = patterns('ride.views',
                        url(r'update_client_location/$', 'update_client_location', name="update_client_location"),
                        url(r'pickup_client/$', 'pickup_client', name="pickup_client"),
                        url(r'drop_client/$', 'drop_client', name="drop_client"),
-                       url(r'get_driver_location/$', 'get_driver_location', name="get_driver_location")
+                       url(r'get_driver_location/$', 'get_driver_location', name="get_driver_location"),
+                       url(r'get_current_route/$', 'get_current_route', name="get_current_route")
                        )

@@ -26,23 +26,26 @@
     var map;
     var busMarker;
     var driverLocationURL = "{% url 'get_driver_location' %}";
+    var routeURL = "{% url 'get_current_route' %}";
+    var clientMarkers = [];
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: 37.335792, lng: -121.885848},
             zoom: 14
         });
-        var updateDriverLocationInterval = window.setInterval(updateDriverLocation, 3000);
+        updateDriverLocation();
+        var displayRouteInterval = window.setInterval(displayRoute, 3000);
     }
     function updateDriverLocation() {
-        $.get(driverLocationURL, function(data){
+        $.get(driverLocationURL, function (data) {
             var driverLocation = {
                 lat: data['latitude'],
                 lng: data['longitude']
             };
-            if (busMarker != undefined){
+            if (busMarker != undefined) {
                 busMarker.setMap(null);
+                busMarker = null;
             }
-
             var busIcon = {
                 url: "http://maps.google.com/mapfiles/kml/shapes/bus.png",
                 scaledSize: new google.maps.Size(20, 20)
@@ -55,10 +58,57 @@
 
         });
     }
+    function displayRoute() {
+        var busIcon = {
+            url: "http://maps.google.com/mapfiles/kml/shapes/bus.png",
+            scaledSize: new google.maps.Size(20, 20)
+        };
+        var personIcon = {
+            url: "http://maps.google.com/mapfiles/kml/shapes/man.png",
+            scaledSize: new google.maps.Size(15, 15)
+        };
+        $.get(routeURL, function (data) {
+            if (data.length > 0) {
+                if (busMarker != undefined) {
+                    busMarker.setMap(null);
+                }
+                busMarker = new google.maps.Marker({
+                    map: map,
+                    position: new google.maps.LatLng(data[0].latLng),
+                    icon: busIcon
+                });
+                for (var i = 0; i < clientMarkers.length; i++) {
+                    clientMarkers[i].map = null;
+                }
+                var customMarker;
+                var contentString = "";
+                var infowindow = new google.maps.InfoWindow({
+                    content: ""
+                });
+                for (i = 1; i < data.length; i++) {
+                    customMarker = null;
+                    contentString = '<div class="header">Person: ' + data[i]['user']['first_name'] + ' ' + data[i]['user']['last_name'] + '</div>';
+                    customMarker = new google.maps.Marker({
+                        map: map,
+                        position: new google.maps.LatLng(data[i].latLng),
+                        icon: personIcon,
+                        html: contentString
+                    });
+                    google.maps.event.addListener(customMarker, 'click', function () {
+                        infowindow.setContent(this.html);
+                        infowindow.open(map, this);
+                    });
+                    clientMarkers.push(customMarker);
+                }
+            }
+
+
+        });
+    }
 
 
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{maps_key}}&callback=initMap"
+<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_key }}&callback=initMap"
         async defer></script>
 </body>
 </html>

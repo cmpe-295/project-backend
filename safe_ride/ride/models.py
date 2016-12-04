@@ -92,7 +92,7 @@ def calculate_route(client_id=None):
         "custom_type": "start"
     })
     for location in Ride.objects.filter(active=True, deleted=False).order_by("request_received_at")[:8]:
-	print location
+        print location
         if location.serviced_by:
             locations.append({
                 "latLng": {
@@ -119,12 +119,12 @@ def calculate_route(client_id=None):
         response = requests.post(mapquest_url, data=json.dumps(request_body))
         if response.status_code == 200:
             try:
-		time_matrix = json.loads(response.content)['time']
-	    except:
-		return None, None
-	    path = [i for i in range(0, len(time_matrix))]
-	    cost_matrix = time_matrix[0]
-            #path, cost_matrix = dijkstra(time_matrix)
+                time_matrix = json.loads(response.content)['time']
+            except:
+                return None, None
+            path = [i for i in range(0, len(time_matrix))]
+            cost_matrix = time_matrix[0]
+            # path, cost_matrix = dijkstra(time_matrix)
             eta = 0
             path_in_co_ordinates = [{
                 "latLng": locations[0]['latLng'],
@@ -145,8 +145,10 @@ def calculate_route(client_id=None):
                 for i in range(1, len(path_in_co_ordinates)):
                     if path_in_co_ordinates[i]["user"]["id"] == client_id:
                         eta_for_client = path_in_co_ordinates[i]["eta"]
-		if current_driver_location.driver.push_notification_token:
-                	result = PUSH_SERVICE.notify_single_device(registration_id=current_driver_location.driver.push_notification_token, data_message={"path": path_in_co_ordinates}, message_body={"path": path_in_co_ordinates})
+                if current_driver_location.driver.push_notification_token:
+                    result = PUSH_SERVICE.notify_single_device(
+                        registration_id=current_driver_location.driver.push_notification_token,
+                        data_message={"path": path_in_co_ordinates}, message_body={"path": path_in_co_ordinates})
                 return path_in_co_ordinates, eta_for_client
 
             return path_in_co_ordinates
