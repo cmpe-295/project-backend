@@ -8,5 +8,6 @@ urlpatterns = patterns('core.views',
                        url(r'^update_device_token/$', 'update_device_token'),
                        url(r'^update_client_token/$', 'update_client_token'),
                        url(r'^monitor/$', 'monitor'),
+                       url(r'^get_info/$', 'get_info'),
                        url(r'', 'home')
                        )

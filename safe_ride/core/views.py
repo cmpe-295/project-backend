@@ -128,3 +128,17 @@ def update_client_token(request):
 @login_required()
 def monitor(request):
     return render(request, 'monitor.html', {"maps_key": "AIzaSyD_9ysjfo1wKN3jul2uF4rE00Yz_2_6ylo"})
+
+
+@api_view(['GET'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def get_info(request):
+    if hasattr(request.user, "client"):
+        client = request.user.client
+        client_serialized = ClientSerializer(client)
+        return Response(client_serialized.data)
+    if hasattr(request.user, "driver"):
+        driver = request.user.driver
+        driver_serialized = DriverSerializer(driver)
+        return Response(driver_serialized.data)
+    return Response(status=status.HTTP_404_NOT_FOUND)
