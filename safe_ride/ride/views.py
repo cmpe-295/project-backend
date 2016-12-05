@@ -1,16 +1,17 @@
+from core.models import Client
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
-
-# Create your views here.
 from django.utils import timezone
+from pyfcm import FCMNotification
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 
-from core.models import Client
-from .serializers import RideSerializer
 from .models import Ride, DriverLocation, calculate_route
+from .serializers import RideSerializer
+
+CLIENT_PUSH_SERVICE = FCMNotification(api_key=settings.FIREBASE_CLIENT_KEY)
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -133,14 +134,17 @@ def pickup_client(request):
                 ride.pickup_at = timezone.now()
                 ride.save()
                 route = calculate_route()
+                if ride.client.push_notification_token:
+                    result = CLIENT_PUSH_SERVICE.notify_single_device(
+                        registration_id=ride.client.push_notification_token,
+                        data_message={"info": "pickup", "route": route},
+                        message_body={"info": "pickup", "route": route})
+                    print result
                 return Response({
                     "route": route,
                     "success": True,
                     "message": "Pickup Successful. Route updated."
                 })
-                '''
-                    TO DO: Send Push notifications to clients with new route
-                '''
             else:
                 return Response({
                     "error": True,
@@ -172,14 +176,17 @@ def drop_client(request):
                 ride.drop_at = timezone.now()
                 ride.save()
                 route = calculate_route()
+                if ride.client.push_notification_token:
+                    result = CLIENT_PUSH_SERVICE.notify_single_device(
+                        registration_id=ride.client.push_notification_token,
+                        data_message={"info": "drop"},
+                        message_body={"info": "drop"})
+                    print result
                 return Response({
                     "route": route,
                     "success": True,
                     "message": "Drop Successful. Route updated."
                 })
-                '''
-                    TO DO: Send Push notifications to clients with new route
-                '''
             else:
                 return Response({
                     "error": True,
