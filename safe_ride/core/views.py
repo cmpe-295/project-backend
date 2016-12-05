@@ -110,21 +110,6 @@ def update_device_token(request):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
-def update_client_token(request):
-    if hasattr(request.user, "client"):
-        token = request.data.get("token")
-        request.user.client.push_notification_token = token
-        request.user.client.save()
-        return Response({}, status=status.HTTP_201_CREATED)
-    else:
-        return Response({
-            "error": True,
-            "message": "Client not found."
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-
 @login_required()
 def monitor(request):
     return render(request, 'monitor.html', {"maps_key": "AIzaSyD_9ysjfo1wKN3jul2uF4rE00Yz_2_6ylo"})
