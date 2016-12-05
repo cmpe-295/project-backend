@@ -53,6 +53,7 @@ class Client(models.Model):
     activation_link_offset = models.TextField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    push_notification_token = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return "%s %s" % (self.user.first_name, self.user.last_name)

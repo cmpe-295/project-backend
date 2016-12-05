@@ -100,7 +100,6 @@ def get_info(request):
 def update_device_token(request):
     if hasattr(request.user, "driver"):
         token = request.data.get("token")
-        print token
         request.user.driver.push_notification_token = token
         request.user.driver.save()
         return Response({}, status=status.HTTP_201_CREATED)
@@ -108,6 +107,21 @@ def update_device_token(request):
         return Response({
             "error": True,
             "message": "Driver not found."
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@authentication_classes((CsrfExemptSessionAuthentication, TokenAuthentication))
+def update_client_token(request):
+    if hasattr(request.user, "client"):
+        token = request.data.get("token")
+        request.user.client.push_notification_token = token
+        request.user.client.save()
+        return Response({}, status=status.HTTP_201_CREATED)
+    else:
+        return Response({
+            "error": True,
+            "message": "Client not found."
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
