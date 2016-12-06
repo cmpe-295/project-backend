@@ -42,12 +42,11 @@ def request_ride(request):
     )
     ride.save()
     route, eta_for_client = calculate_route(client.id)
-    print route
-    print eta_for_client
     ride.initial_eta = eta_for_client
     ride.save()
     ride_serialized = RideSerializer(ride)
     return Response({
+        "message": "Ride requested",
         "success": True,
         "route": route,
         "ride": ride_serialized.data,
