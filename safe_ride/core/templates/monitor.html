@@ -102,6 +102,9 @@
         $.get(routeURL, function (data) {
             if (data.length > 0) {
                 if (data[0] == null){
+                    for (var i = 0; i < clientMarkers.length; i++) {
+                        clientMarkers[i].map = null;
+                    }
                     return;
                 }
                 if (busMarker != undefined) {
