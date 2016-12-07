@@ -100,8 +100,10 @@
             scaledSize: new google.maps.Size(15, 15)
         };
         $.get(routeURL, function (data) {
-            console.log(data);
             if (data.length > 0) {
+                if (data[0] == null){
+                    return;
+                }
                 if (busMarker != undefined) {
                     busMarker.setMap(null);
                 }
@@ -162,9 +164,6 @@
                     });
                     clientMarkers.push(customMarker);
                 }
-            }
-            else{
-                console.log("Less than 0");
             }
 
         });
